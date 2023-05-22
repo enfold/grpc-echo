@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM amd64/alpine:latest
 EXPOSE 5050
 
 COPY grpc-echo-server /bin
