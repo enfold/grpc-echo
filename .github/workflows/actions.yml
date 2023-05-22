@@ -15,7 +15,7 @@ jobs:
         run: |
           go build -o grpc-echo-server main.go
       - name: Publish artifects
-        uses: action/upload-artifact@v2
+        uses: actions/upload-artifact@v2
         with:
           name: grpc-echo-server
           path: grpc-echo-server
