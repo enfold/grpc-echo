@@ -24,5 +24,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
+          context: ${{github.workspace}}
           push: true
           tags: edzhu/grpc-echo-server:latest,edzhu/grpc-echo-server:${{vars.VERSION}}.${{github.run_number}}
