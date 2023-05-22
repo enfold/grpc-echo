@@ -1,0 +1,40 @@
+name: Upload Docker image
+on:
+  push:
+    branches:
+      - "master"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3
+      - name: Setup Go
+        uses: actions/setup-go@v4
+      - name: Build
+        run: |
+          go build -o grpc-echo-server main.go
+      - name: Publish artifects
+        uses: action/upload-artifact@2
+        with:
+          name: grpc-echo-server
+          path: grpc-echo-server
+          retention-days: 1
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifects
+        uses: actions/download-artifact@2
+        with:
+          name: grpc-echo-server
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: edzhu/grpc-echo-server:latest,edzhu/grpc-echo-server:${{github.run_number}}
