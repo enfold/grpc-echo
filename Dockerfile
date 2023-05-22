@@ -1,5 +1,6 @@
 FROM alpine:latest
 EXPOSE 5050
 
-ADD grpc-echo-server .
+COPY grpc-echo-server .
+RUN chmod +x grpc-echo-server
 ENTRYPOINT [ "./grpc-echo-server" ]
