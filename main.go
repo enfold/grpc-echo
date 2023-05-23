@@ -22,15 +22,16 @@ func (s *EchoServer) UnaryEcho(ctx context.Context, req *pb.EchoRequest) (*pb.Ec
 func (s *EchoServer) ServerStreamingEcho(req *pb.EchoRequest, streaming pb.Echo_ServerStreamingEchoServer) error {
 	log.Printf("received streaming request: %v", req.GetMessage())
 	resp := &pb.EchoResponse{Message: req.GetMessage()}
-
 	i := 0
-	for i < 2 {
-		streaming.Send(resp)
-		time.Sleep(time.Duration(2) * time.Second)
-		i++
-	}
 
-	return nil
+	for {
+		if err := streaming.Send(resp); err != nil {
+			return err
+		}
+		i++
+		log.Printf("send the response [%v]: %v", i, resp.GetMessage())
+		time.Sleep(time.Duration(2) * time.Second)
+	}
 }
 
 func (s *EchoServer) ClientStreamingEcho(streaming pb.Echo_ClientStreamingEchoServer) error {
