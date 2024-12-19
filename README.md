@@ -2,6 +2,32 @@
 
 This is a simple gRPC Echo Server implemented in Go. It provides unary and streaming echo services.
 
+## Build Server Docker Container
+
+```shell
+docker build -t grpc-echo:1 .
+```
+
+## Run Server Docker Container
+
+```shell
+docker run -p443:443 --rm grpc-echo:1
+```
+
+## Build Client Container
+
+```shell
+cd client
+docker build -t grpc-echo-client:1 .
+```
+
+## Run Client Container
+
+```shell
+docker run --rm grpc-echo-client:1 {{ server_ip_address_or_hostname }}:{{ server_port }}
+```
+
+
 ## Prerequisites
 
 - Go programming language (version 1.16 or higher)

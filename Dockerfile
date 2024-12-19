@@ -1,5 +1,7 @@
-FROM golang:alpine as builder
-RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
+FROM golang:alpine
+EXPOSE 443
+
+RUN apk update && apk add --no-cache git ca-certificates tzdata stunnel supervisor && update-ca-certificates
 
 ENV USER=appuser
 ENV UID=10001
@@ -14,18 +16,21 @@ RUN adduser \
     "${USER}"
 
 WORKDIR $GOPATH/src/mypackage/myapp/
-COPY . .
+COPY proto go.mod go.sum main.go LICENSE README.md $GOPATH/src/mypackage/myapp/
 
 RUN go mod download
 RUN go mod verify
 
 RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /go/bin/grpc-echo-server .
 
-FROM scratch
-EXPOSE 5050
+COPY stunnel.crt /etc/stunnel/stunnel.crt
+COPY stunnel.key /etc/stunnel/stunnel.key
+COPY stunnel.conf /etc/stunnel/
 
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
-COPY --from=builder /go/bin/grpc-echo-server /go/bin/grpc-echo-server
-# RUN chmod +x /bin/grpc-echo-server
-ENTRYPOINT [ "/go/bin/grpc-echo-server" ]
+RUN mkdir /var/run/stunnel && \
+    chown stunnel:root /var/run/stunnel && \
+    chmod 0770 /var/run/stunnel
+
+RUN mkdir /etc/supervisor.d
+COPY server.ini /etc/supervisor.d/
+CMD [ "/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
